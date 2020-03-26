@@ -8,16 +8,22 @@
     "prestart": "npm run lint && npm run build",
     "start": "func start",
     "test": "echo \"No tests yet...\"",
-    "lint": "eslint . --ext .ts --fix"
+    "lint": "eslint . --ext .ts --fix",
+    "dev": "nodemon --exec npm start --ext .ts --watch requests"
   },
-  "dependencies": {},
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "jsonwebtoken": "^8.5.1"
+  },
   "devDependencies": {
     "@azure/functions": "^1.0.2-beta2",
+    "@types/jsonwebtoken": "^8.3.8",
     "@typescript-eslint/eslint-plugin": "^2.25.0",
     "@typescript-eslint/parser": "^2.25.0",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.1",
     "eslint-plugin-prettier": "^3.1.2",
+    "nodemon": "^2.0.2",
     "prettier": "^2.0.2",
     "typescript": "^3.3.3"
   }
