@@ -79,6 +79,36 @@ const httpTrigger: AzureFunction = async (
       return
   }
 
+  const zip = req.body.zip
+  const request = req.body.request
+
+  // Check if zip code and request exist
+  if (!zip || !request) {
+    context.res = {
+      status: 400,
+      body: 'Zip code or request is missing',
+    }
+    return
+  }
+
+  // Check if the zip code is a five number construct
+  if (isNaN(zip) || !(zip + '').length || (zip + '').length !== 5) {
+    context.res = {
+      status: 400,
+      body: 'Not a valid zip code',
+    }
+    return
+  }
+
+  // Check if the request code is a number between -1 and 9
+  if (isNaN(request) || request < -1 || request > 9) {
+    context.res = {
+      status: 400,
+      body: 'Not a valid request code',
+    }
+    return
+  }
+
   context.res = {
     status: 200,
     body: 'Success',
