@@ -1,6 +1,9 @@
 import { AzureFunction, Context, HttpRequest } from '@azure/functions'
 import * as jwt from 'jsonwebtoken'
 import * as dotenv from 'dotenv'
+import * as mongodb from 'mongodb'
+
+let client: mongodb.MongoClient = null
 
 const httpTrigger: AzureFunction = async (
   context: Context,
@@ -105,6 +108,33 @@ const httpTrigger: AzureFunction = async (
     context.res = {
       status: 400,
       body: 'Not a valid request code',
+    }
+    return
+  }
+
+  if (client == null) {
+    try {
+      client = await mongodb.MongoClient.connect(process.env.DB)
+    } catch (err) {
+      context.res = {
+        status: 500,
+        body: 'Something went wrong',
+      }
+      return
+    }
+  }
+
+  try {
+    await client.db('coronadb').collection('requests').insertOne({
+      timestamp: Date.now(),
+      phone: phoneNumber,
+      zip: zip,
+      request: request,
+    })
+  } catch (err) {
+    context.res = {
+      status: 500,
+      body: 'Something went wrong',
     }
     return
   }
