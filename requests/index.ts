@@ -115,6 +115,8 @@ const httpTrigger: AzureFunction = async (
         useUnifiedTopology: true,
         useNewUrlParser: true,
       })
+
+      context.log('Instantiated a new mongodb client')
     } catch (err) {
       context.res = {
         status: 500,
@@ -122,6 +124,8 @@ const httpTrigger: AzureFunction = async (
       }
       return
     }
+  } else {
+    context.log('Reused mongodb client')
   }
 
   try {
@@ -132,7 +136,10 @@ const httpTrigger: AzureFunction = async (
       request: request,
       __v: 1,
     })
+
+    context.log('Created a new document')
   } catch (err) {
+    context.log(err)
     context.res = {
       status: 500,
       body: 'Something went wrong',
