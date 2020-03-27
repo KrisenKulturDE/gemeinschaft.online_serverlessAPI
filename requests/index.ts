@@ -1,6 +1,5 @@
 import { AzureFunction, Context, HttpRequest } from '@azure/functions'
 import * as jwt from 'jsonwebtoken'
-import * as dotenv from 'dotenv'
 import * as mongodb from 'mongodb'
 
 let client: mongodb.MongoClient = null
@@ -9,8 +8,6 @@ const httpTrigger: AzureFunction = async (
   context: Context,
   req: HttpRequest,
 ): Promise<void> => {
-  dotenv.config()
-
   context.log('HTTP trigger function processed a request.')
 
   // Check if there is a body attached to the request
@@ -33,7 +30,7 @@ const httpTrigger: AzureFunction = async (
 
   // Authenticate using jwt
   try {
-    jwt.verify(req.body.token, process.env.JWT_KEY)
+    jwt.verify(req.body.token, process.env['JWT_KEY'])
   } catch (err) {
     context.res = {
       status: 401,
@@ -114,7 +111,10 @@ const httpTrigger: AzureFunction = async (
 
   if (client == null) {
     try {
-      client = await mongodb.MongoClient.connect(process.env.DB)
+      client = await mongodb.MongoClient.connect(process.env['DB'], {
+        useUnifiedTopology: true,
+        useNewUrlParser: true,
+      })
     } catch (err) {
       context.res = {
         status: 500,
