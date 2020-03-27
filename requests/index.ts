@@ -130,6 +130,7 @@ const httpTrigger: AzureFunction = async (
       phone: phoneNumber,
       zip: zip,
       request: request,
+      __v: 1,
     })
   } catch (err) {
     context.res = {
