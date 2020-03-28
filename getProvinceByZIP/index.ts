@@ -1,5 +1,6 @@
 import { AzureFunction, Context, HttpRequest } from '@azure/functions'
 
+let client: mongodb.MongoClient = null
 const httpTrigger: AzureFunction = async function (
   context: Context,
   req: HttpRequest,
@@ -27,6 +28,68 @@ const httpTrigger: AzureFunction = async function (
     }
     return
   }
+  if (client == null) {
+    try {
+      client = await mongodb.MongoClient.connect(process.env['DB'], {
+        useUnifiedTopology: true,
+        useNewUrlParser: true,
+      })
+
+      context.log('Instantiated a new mongodb client')
+    } catch (err) {
+      context.res = {
+        status: 500,
+        body: {
+          success: 0,
+          content: {
+            errorMessage: 'Something went wrong'
+          }
+        }
+      }
+      return
+    }
+  } else {
+    context.log('Reused mongodb client')
+  }
+  try {
+    const provinceCode = await client.db('coronadb').collection('regions').findOne({zipCode: zip})
+    if(provinceCode) {
+      context.res = {
+        status: 200,
+        body: {
+          success: 1,
+          content: {
+            provinceId: provinceCode
+          }
+        }
+      }
+    } else {
+      context.res = {
+        status: 404,
+        body: {
+          success: 0,
+          content: {
+            errorMessage: "provinceID was not found"
+          }
+        }
+    }
+    context.log('Found provinceID')
+  } catch (err) {
+      context.log(err)
+      context.res = {
+        status: 500,
+        body: {
+          success: 0,
+          content : {
+            error_message: "Something went wrong"
+          }
+        }
+      }
+    }
+    return
+  }
+
+
 }
 
 export default httpTrigger
