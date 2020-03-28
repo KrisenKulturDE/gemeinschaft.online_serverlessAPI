@@ -101,7 +101,7 @@ const httpTrigger: AzureFunction = async (
   }
 
   // Check if the request code is a number between -1 and 9
-  if (isNaN(request) || request < -1 || request > 9) {
+  if (typeof request !== 'number' || request < -1 || request > 9) {
     context.res = {
       status: 400,
       body: 'Not a valid request code',
