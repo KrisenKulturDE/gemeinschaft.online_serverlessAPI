@@ -72,6 +72,7 @@ const httpTrigger: AzureFunction = async function (
             errorMessage: "provinceID was not found"
           }
         }
+      }
     }
     context.log('Found provinceID')
   } catch (err) {
@@ -90,6 +91,6 @@ const httpTrigger: AzureFunction = async function (
   }
 
 
-}
+
 
 export default httpTrigger
