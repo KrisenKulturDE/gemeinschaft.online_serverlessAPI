@@ -14,7 +14,12 @@ const httpTrigger: AzureFunction = async (
   if (!req.body) {
     context.res = {
       status: 400,
-      body: 'The request body is empty',
+      body: {
+        success: 0,
+        content: {
+        errorMessage : 'The request body is empty',
+        }
+      }
     }
     return
   }
@@ -23,7 +28,12 @@ const httpTrigger: AzureFunction = async (
   if (!req.body.token) {
     context.res = {
       status: 401,
-      body: 'No token provided',
+      body: {
+        success: 0,
+        content: {
+        errorMessage : 'No Token provided',
+        }
+      }
     }
     return
   }
@@ -45,7 +55,12 @@ const httpTrigger: AzureFunction = async (
   if (!phoneNumber || typeof phoneNumber !== 'string') {
     context.res = {
       status: 400,
-      body: 'The phone number is empty',
+      body: {
+        success: 0,
+        content: {
+        errorMessage : 'The phone number is empty',
+        }
+      }
     }
     return
   }
@@ -57,7 +72,12 @@ const httpTrigger: AzureFunction = async (
   if (firstTwo === '00' && firstFour !== '0049') {
     context.res = {
       status: 400,
-      body: 'Not a german number',
+      body: {
+        success: 0,
+        content: {
+          errorMessage: 'Not a german number'
+        }
+      }
     }
     return
   } else if (firstFour === '0049') {
@@ -74,7 +94,12 @@ const httpTrigger: AzureFunction = async (
     case '1180':
       context.res = {
         status: 400,
-        body: 'This phone number is not allowed',
+        body: {
+          success: 0,
+          content: {
+          errorMessage: 'This phone number is not allowed'
+          }
+        }
       }
       return
   }
@@ -95,7 +120,12 @@ const httpTrigger: AzureFunction = async (
   if (isNaN(zip) || !(zip + '').length || (zip + '').length !== 5) {
     context.res = {
       status: 400,
-      body: 'Not a valid zip code',
+      body: {
+        success: 0, 
+        content: {
+          errorMessage:'Not a valid zip code'
+        }
+      }
     }
     return
   }
@@ -104,7 +134,12 @@ const httpTrigger: AzureFunction = async (
   if (isNaN(request) || request < -1 || request > 9) {
     context.res = {
       status: 400,
-      body: 'Not a valid request code',
+      body: {
+        success: 0, 
+        content: {
+          errorMessage:'Not a valid request code'
+        }
+      }
     }
     return
   }
@@ -127,12 +162,61 @@ const httpTrigger: AzureFunction = async (
   } else {
     context.log('Reused mongodb client')
   }
+  if (client == null) {
+    try {
+      client = await mongodb.MongoClient.connect(process.env['DB'], {
+        useUnifiedTopology: true,
+        useNewUrlParser: true,
+      })
 
+      context.log('Instantiated a new mongodb client')
+    } catch (err) {
+      context.res = {
+        status: 500,
+        body: {
+          success: 0,
+          content: {
+            errorMessage: 'Something went wrong'
+          }
+        }
+      }
+      return
+    }
+  } else {
+    context.log('Reused mongodb client')
+  }
+  let provinceCode;
+  try {
+    provinceCode = await client.db('coronadb').collection('regions').findOne({zipCode: zip})
+    if(!provinceCode) {
+      context.res = {
+        status: 404,
+        body: {
+          success: 0,
+          content: {
+            errorMessage: "provinceID was not found"
+          }
+        }
+      }
+    }
+    context.log('Found provinceID')
+  } catch (err) {
+      context.log(err)
+      context.res = {
+        status: 500,
+        body: {
+          success: 0,
+          content : {
+            error_message: "Something went wrong"
+          }
+        }
+      }
+  }
   try {
     await client.db('coronadb').collection('requests').insertOne({
       timestamp: Date.now(),
       phone: phoneNumber,
-      zip: zip,
+      province: provinceCode,
       request: request,
       __v: 1,
     })
@@ -142,15 +226,28 @@ const httpTrigger: AzureFunction = async (
     context.log(err)
     context.res = {
       status: 500,
-      body: 'Something went wrong',
+      body: {
+        success: 0,
+        content: {
+          errorMessage : 'Something went wrong'
+        }
+      }
     }
     return
   }
 
   context.res = {
     status: 200,
-    body: 'Success',
+    body: {
+      success: 1,
+      content: {
+        message: "Successfully added call."
+      }
+    }
   }
+  return
 }
 
+
 export default httpTrigger
+
