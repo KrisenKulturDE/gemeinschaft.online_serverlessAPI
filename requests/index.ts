@@ -187,7 +187,7 @@ const httpTrigger: AzureFunction = async (
   }
   let provinceCode;
   try {
-    const provinceCode = await client.db('coronadb').collection('regions').findOne({zipCode: zip})
+    provinceCode = await client.db('coronadb').collection('regions').findOne({zipCode: zip})
     if(!provinceCode) {
       context.res = {
         status: 404,
