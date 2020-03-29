@@ -1,7 +1,7 @@
 import { AzureFunction, Context, HttpRequest } from '@azure/functions'
 import * as mongodb from 'mongodb'
 
-let client: mongodb.MongoClient = null
+let client: mongodb.MongoClient | null = null
 const httpTrigger: AzureFunction = async function (
   context: Context,
   req: HttpRequest,
@@ -31,7 +31,7 @@ const httpTrigger: AzureFunction = async function (
   }
   if (client == null) {
     try {
-      client = await mongodb.MongoClient.connect(process.env['DB'], {
+      client = await mongodb.MongoClient.connect(process.env['DB'] as string, {
         useUnifiedTopology: true,
         useNewUrlParser: true,
       })

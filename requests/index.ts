@@ -2,7 +2,7 @@ import { AzureFunction, Context, HttpRequest } from '@azure/functions'
 import * as jwt from 'jsonwebtoken'
 import * as mongodb from 'mongodb'
 
-let client: mongodb.MongoClient = null
+let client: mongodb.MongoClient | null = null
 
 const httpTrigger: AzureFunction = async (
   context: Context,
@@ -40,7 +40,7 @@ const httpTrigger: AzureFunction = async (
 
   // Authenticate using jwt
   try {
-    jwt.verify(req.body.token, process.env['JWT_KEY'])
+    jwt.verify(req.body.token, process.env['JWT_KEY'] as jwt.Secret)
   } catch (err) {
     context.res = {
       status: 401,
@@ -146,7 +146,7 @@ const httpTrigger: AzureFunction = async (
 
   if (client == null) {
     try {
-      client = await mongodb.MongoClient.connect(process.env['DB'], {
+      client = await mongodb.MongoClient.connect(process.env['DB'] as string, {
         useUnifiedTopology: true,
         useNewUrlParser: true,
       })
@@ -164,7 +164,7 @@ const httpTrigger: AzureFunction = async (
   }
   if (client == null) {
     try {
-      client = await mongodb.MongoClient.connect(process.env['DB'], {
+      client = await mongodb.MongoClient.connect(process.env['DB'] as string, {
         useUnifiedTopology: true,
         useNewUrlParser: true,
       })
@@ -185,7 +185,7 @@ const httpTrigger: AzureFunction = async (
   } else {
     context.log('Reused mongodb client')
   }
-  let provinceCode
+  let provinceCode: number | null = null
   try {
     provinceCode = await client
       .db('coronadb')
