@@ -17,9 +17,9 @@ const httpTrigger: AzureFunction = async (
       body: {
         success: 0,
         content: {
-        errorMessage : 'The request body is empty',
-        }
-      }
+          errorMessage: 'The request body is empty',
+        },
+      },
     }
     return
   }
@@ -31,9 +31,9 @@ const httpTrigger: AzureFunction = async (
       body: {
         success: 0,
         content: {
-        errorMessage : 'No Token provided',
-        }
-      }
+          errorMessage: 'No Token provided',
+        },
+      },
     }
     return
   }
@@ -58,9 +58,9 @@ const httpTrigger: AzureFunction = async (
       body: {
         success: 0,
         content: {
-        errorMessage : 'The phone number is empty',
-        }
-      }
+          errorMessage: 'The phone number is empty',
+        },
+      },
     }
     return
   }
@@ -75,9 +75,9 @@ const httpTrigger: AzureFunction = async (
       body: {
         success: 0,
         content: {
-          errorMessage: 'Not a german number'
-        }
-      }
+          errorMessage: 'Not a german number',
+        },
+      },
     }
     return
   } else if (firstFour === '0049') {
@@ -97,9 +97,9 @@ const httpTrigger: AzureFunction = async (
         body: {
           success: 0,
           content: {
-          errorMessage: 'This phone number is not allowed'
-          }
-        }
+            errorMessage: 'This phone number is not allowed',
+          },
+        },
       }
       return
   }
@@ -121,11 +121,11 @@ const httpTrigger: AzureFunction = async (
     context.res = {
       status: 400,
       body: {
-        success: 0, 
+        success: 0,
         content: {
-          errorMessage:'Not a valid zip code'
-        }
-      }
+          errorMessage: 'Not a valid zip code',
+        },
+      },
     }
     return
   }
@@ -135,11 +135,11 @@ const httpTrigger: AzureFunction = async (
     context.res = {
       status: 400,
       body: {
-        success: 0, 
+        success: 0,
         content: {
-          errorMessage:'Not a valid request code'
-        }
-      }
+          errorMessage: 'Not a valid request code',
+        },
+      },
     }
     return
   }
@@ -176,44 +176,47 @@ const httpTrigger: AzureFunction = async (
         body: {
           success: 0,
           content: {
-            errorMessage: 'Something went wrong'
-          }
-        }
+            errorMessage: 'Something went wrong',
+          },
+        },
       }
       return
     }
   } else {
     context.log('Reused mongodb client')
   }
-  let provinceCode;
+  let provinceCode
   try {
-    provinceCode = await client.db('coronadb').collection('regions').findOne({zipCode: zip})
-    if(!provinceCode) {
+    provinceCode = await client
+      .db('coronadb')
+      .collection('regions')
+      .findOne({ zipCode: zip })
+    if (!provinceCode) {
       context.res = {
         status: 404,
         body: {
           success: 0,
           content: {
-            errorMessage: "provinceID was not found"
-          }
-        }
+            errorMessage: 'provinceID was not found',
+          },
+        },
       }
     }
     context.log('Found provinceID')
   } catch (err) {
-      context.log(err)
-      context.res = {
-        status: 500,
-        body: {
-          success: 0,
-          content : {
-            error_message: "Something went wrong"
-          }
-        }
-      }
+    context.log(err)
+    context.res = {
+      status: 500,
+      body: {
+        success: 0,
+        content: {
+          errorMessage: 'Something went wrong',
+        },
+      },
+    }
   }
   try {
-    await client.db('coronadb').collection('requests').insertOne({
+    await client.db('coronadb').collection('calls').insertOne({
       timestamp: Date.now(),
       phone: phoneNumber,
       province: provinceCode,
@@ -229,9 +232,9 @@ const httpTrigger: AzureFunction = async (
       body: {
         success: 0,
         content: {
-          errorMessage : 'Something went wrong'
-        }
-      }
+          errorMessage: 'Something went wrong',
+        },
+      },
     }
     return
   }
@@ -241,13 +244,11 @@ const httpTrigger: AzureFunction = async (
     body: {
       success: 1,
       content: {
-        message: "Successfully added call."
-      }
-    }
+        message: 'Successfully added call.',
+      },
+    },
   }
   return
 }
 
-
 export default httpTrigger
-
